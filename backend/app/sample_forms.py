@@ -568,10 +568,206 @@ SAMPLE_TAX_FORM = FormAnalysisResult(
     analyzed_at=datetime.now().isoformat()
 )
 
+SAMPLE_FORM_122B = FormAnalysisResult(
+    document_name="Official_Form_122B_Chapter_11_Income.pdf",
+    form_title="Official Form 122B - Chapter 11 Statement of Your Current Monthly Income",
+    issuing_organization="United States Bankruptcy Court (Judicial Branch of US Government)",
+    form_purpose="Mandatory statutory income disclosure for individual Chapter 11 bankruptcy debtors under 11 U.S.C. § 101(10A).",
+    is_demo=True,
+    model_used="Gemma 4 (Demo Mode Verified Sample)",
+    summary_english=(
+        "Official Form 122B must be filed by any individual filing for bankruptcy under Chapter 11. "
+        "It calculates your average monthly gross income across all sources received during the 6 full calendar months "
+        "prior to the filing date. Part 1 breaks down income columns for Debtor 1 and Debtor 2 (spouse), and Part 2 requires "
+        "declaration under penalty of perjury."
+    ),
+    summary_hinglish=(
+        "Yeh Official Form 122B un individuals ke liye mandatory hai jo Chapter 11 bankruptcy file kar rahe hain. "
+        "Isme bankruptcy file karne ki date se theek pehle ke 6 poore mahino ki average monthly income calculate karni hoti hai. "
+        "Part 1 mein Debtor 1 aur agar spouse bhi saath file kar raha hai toh Column B (Debtor 2) ki income bhari jaati hai. "
+        "Part 2 mein penalty of perjury ke tehat sign karna hota hai, galat jaankari dene par federal criminal charges lag sakte hain."
+    ),
+    deadlines=[
+        DeadlineItem(
+            title="Chapter 11 Income Statement Filing Deadline",
+            date_or_time="With petition or within 14 days of bankruptcy petition filing",
+            category="submission",
+            urgency="high",
+            source_quote="You must file this form if you are an individual and are filing for bankruptcy under Chapter 11.",
+            source_reference="11 U.S.C. § 101(10A) & Fed. R. Bankr. P. 1007(c)"
+        ),
+        DeadlineItem(
+            title="6-Month Income Calculation Reference Window",
+            date_or_time="6 full calendar months ending on the last day of calendar month preceding filing",
+            category="validity",
+            urgency="medium",
+            source_quote="Fill in the average monthly income that you received from all sources, derived during the 6 full months before you file this bankruptcy case. For example, if you are filing on September 15, the 6-month period would be March 1 through August 31.",
+            source_reference="Part 1, Preamble (11 U.S.C. § 101(10A))"
+        )
+    ],
+    required_documents=[
+        RequiredDocumentItem(
+            name="6 Months Pay Stubs & Wage Statements",
+            acceptable_types=[
+                "Employer payment advices / pay stubs for past 6 months",
+                "W-2 or 1099 wage and tax statements",
+                "Direct deposit bank statements confirming payroll credits"
+            ],
+            format_and_specs="Official statements covering each pay cycle in the 6-month lookback period before filing.",
+            is_mandatory=True,
+            source_quote="Fill in the average monthly income that you received from all sources, derived during the 6 full months before you file this bankruptcy case.",
+            source_reference="Part 1, Line 2"
+        ),
+        RequiredDocumentItem(
+            name="Business or Farm Profit & Loss Statement (Schedule C)",
+            acceptable_types=[
+                "Monthly P&L income statements for 6 months",
+                "Operating bank accounts ledgers and itemized expense reports"
+            ],
+            format_and_specs="Itemized gross receipts minus ordinary and necessary operating expenses.",
+            is_mandatory=False,
+            source_quote="Net income from operating a business, profession, or farm: Gross receipts minus ordinary and necessary operating expenses.",
+            source_reference="Part 1, Line 5"
+        ),
+        RequiredDocumentItem(
+            name="Rental Property Income & Expense Documentation",
+            acceptable_types=[
+                "Lease agreements & monthly rent ledger",
+                "Bank statements showing tenant rent receipts & paid property expenses"
+            ],
+            format_and_specs="Gross rental receipts minus ordinary operating expenses.",
+            is_mandatory=False,
+            source_quote="Net income from rental and other real property: Gross receipts minus ordinary and necessary operating expenses.",
+            source_reference="Part 1, Line 6"
+        )
+    ],
+    required_fields=[
+        RequiredFieldItem(
+            field_name="Marital and Filing Status",
+            field_type="dropdown",
+            description="Select whether Not married, Married filing jointly, or Married filing separately",
+            is_mandatory=True,
+            validation_rules="Must check exactly one option. If spouse is filing with you, Columns A and B must both be completed.",
+            source_reference="Part 1, Line 1"
+        ),
+        RequiredFieldItem(
+            field_name="Gross wages, salary, tips, bonuses (Debtor 1 & Debtor 2)",
+            field_type="number",
+            description="Average gross monthly pay before all deductions and taxes",
+            is_mandatory=True,
+            validation_rules="Enter $0 if none. Add all wages received over 6 months and divide by 6.",
+            source_reference="Part 1, Line 2"
+        ),
+        RequiredFieldItem(
+            field_name="Alimony and maintenance payments",
+            field_type="number",
+            description="Monthly spousal support or maintenance received",
+            is_mandatory=True,
+            validation_rules="Do not include payments from spouse if Column B is filled in.",
+            source_reference="Part 1, Line 3"
+        ),
+        RequiredFieldItem(
+            field_name="Regular contributions for household expenses",
+            field_type="number",
+            description="Amounts contributed by partner, roommates, parents, or dependents for household living costs",
+            is_mandatory=True,
+            validation_rules="Include child support and regular contributions from non-filing family members.",
+            source_reference="Part 1, Line 4"
+        ),
+        RequiredFieldItem(
+            field_name="Total Current Monthly Income (Line 11)",
+            field_type="number",
+            description="Sum of Lines 2 through 10 for Column A plus Column B",
+            is_mandatory=True,
+            validation_rules="Must equal mathematical sum of all listed income categories.",
+            source_reference="Part 1, Line 11"
+        ),
+        RequiredFieldItem(
+            field_name="Part 2 Signatures & Dates (Debtor 1 & Debtor 2)",
+            field_type="signature",
+            description="Signatures under penalty of perjury affirming information is true and correct",
+            is_mandatory=True,
+            validation_rules="Must be signed and dated in MM/DD/YYYY format. Both spouses must sign if filing jointly.",
+            source_reference="Part 2, Sign Below"
+        )
+    ],
+    instructions=[
+        InstructionStep(
+            step_number=1,
+            title="Determine the 6-Month Income Lookback Period",
+            english_explanation="Calculate the 6 full calendar months prior to your petition date (e.g. if filing Sept 15, calculate from March 1 to August 31). Add all income in that period and divide by 6.",
+            hinglish_explanation="Bankruptcy file karne se theek pehle ke 6 complete mahino ki income count karein (agar September 15 ko file kar rahe hain toh 1 March se 31 August tak). Total income ko 6 se divide karke monthly average nikaalein.",
+            critical_warning="Do not use current monthly pay rate; you must use the statutory 6-month historical average.",
+            source_reference="Part 1 Instructions"
+        ),
+        InstructionStep(
+            step_number=2,
+            title="Select Marital Status & Complete Appropriate Columns",
+            english_explanation="Check one option in Line 1. If not married or married filing alone, fill Column A only. If spouse is filing jointly with you, both Column A (Debtor 1) and Column B (Debtor 2) are mandatory.",
+            hinglish_explanation="Line 1 mein single option check karein. Agar akele file kar rahe hain toh sirf Column A bharein. Agar spouse ke saath joint file kar rahe hain toh Column A aur Column B dono poore bharein.",
+            critical_warning="Do not double-count property income owned jointly across both columns.",
+            source_reference="Part 1, Line 1"
+        ),
+        InstructionStep(
+            step_number=3,
+            title="Exclude Protected Benefits (Social Security & COVID Relief)",
+            english_explanation="Do not include Social Security Act benefits, certain military disability/combat injury benefits, or federal COVID-19 relief payments in Line 8, Line 9, or Line 10.",
+            hinglish_explanation="Social Security payments aur government COVID relief ko income total mein add na karein, yeh statutory rule ke tehat exempt hain.",
+            critical_warning="Inadvertently including Social Security may artificially inflate your disposable income calculation.",
+            source_reference="Part 1, Lines 8, 9, 10"
+        ),
+        InstructionStep(
+            step_number=4,
+            title="Sign Declarations Under Penalty of Perjury",
+            english_explanation="Debtor 1 (and Debtor 2 if filing jointly) must sign and date in MM/DD/YYYY format. A federal declaration under penalty of perjury carries criminal liability for false or omitted figures.",
+            hinglish_explanation="Debtor 1 aur agar joint hai toh Debtor 2 dono ko MM/DD/YYYY format mein sign karna hoga. Yaad rahe ki yeh perjury ke tehat declaration hai, koi bhi galat data dene par legal karwayi ho sakti hai.",
+            critical_warning="Ensure all supplemental attached sheets also carry your name and bankruptcy case number.",
+            source_reference="Part 2, Sign Below"
+        )
+    ],
+    missing_info_checklist=[
+        MissingInfoChecklistItem(
+            id="chk-122b-1",
+            field_name="6-Month Paycheck Advices & Bank Deposit Statements",
+            category="financial",
+            why_needed="Mandatory to verify the average monthly wage calculation on Line 2",
+            english_tip="Collect all pay stubs covering every pay period across the exact 6-month statutory lookback window.",
+            hinglish_tip="Pichhle 6 mahino ki har ek salary slip aur bank deposit statement ek jagah jama karein.",
+            source_reference="Part 1, Line 2",
+            is_checked=True
+        ),
+        MissingInfoChecklistItem(
+            id="chk-122b-2",
+            field_name="Bankruptcy Case Number & District Court Name",
+            category="declaration",
+            why_needed="Court identifier to attach income statement to petition docket",
+            english_tip="Fill the specific Judicial District (e.g. Southern District of New York) and assigned case number at the top of every page.",
+            hinglish_tip="Har page ke top par apna bankruptcy District Court aur Case Number zaroor likhein.",
+            source_reference="Page 1 Header",
+            is_checked=False
+        ),
+        MissingInfoChecklistItem(
+            id="chk-122b-3",
+            field_name="Joint Debtor 2 Signatures & Dates",
+            category="declaration",
+            why_needed="Mandatory when married and spouse is filing jointly",
+            english_tip="Confirm both spouses have signed Part 2 and dates match in MM/DD/YYYY format.",
+            hinglish_tip="Agar joint petition hai toh dono Debtors ke signature aur date MM/DD/YYYY format mein confirm karein.",
+            source_reference="Part 2, Sign Below",
+            is_checked=False
+        )
+    ],
+    raw_text_snippet="Official Form 122B - Chapter 11 Statement of Your Current Monthly Income (04/20)... Part 1: Calculate Your Current Monthly Income...",
+    pages_processed=2,
+    char_count=4510,
+    analyzed_at=datetime.now().isoformat()
+)
+
 SAMPLE_FORMS_COLLECTION: Dict[str, FormAnalysisResult] = {
     "passport": SAMPLE_PASSPORT_FORM,
     "scholarship": SAMPLE_SCHOLARSHIP_FORM,
-    "tax_12bb": SAMPLE_TAX_FORM
+    "tax_12bb": SAMPLE_TAX_FORM,
+    "form_122b": SAMPLE_FORM_122B
 }
 
 def get_sample_form_by_id(sample_id: str) -> FormAnalysisResult:
@@ -579,6 +775,13 @@ def get_sample_form_by_id(sample_id: str) -> FormAnalysisResult:
 
 def list_sample_forms_metadata() -> List[Dict[str, str]]:
     return [
+        {
+            "id": "form_122b",
+            "title": SAMPLE_FORM_122B.form_title,
+            "organization": SAMPLE_FORM_122B.issuing_organization,
+            "category": "Legal & Court (Bankruptcy)",
+            "highlights": "6-month income lookback, penalty of perjury, joint spouse rules, benefit exemptions"
+        },
         {
             "id": "passport",
             "title": SAMPLE_PASSPORT_FORM.form_title,

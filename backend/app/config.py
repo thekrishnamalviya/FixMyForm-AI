@@ -58,7 +58,7 @@ def _get_model() -> str:
     return (
         os.getenv("GEMMA_MODEL") 
         or os.getenv("MODEL_NAME") 
-        or "google/gemma-4"
+        or "google/gemma-4-26b-a4b-it"
     ).strip()
 
 class Settings(BaseModel):
@@ -68,14 +68,14 @@ class Settings(BaseModel):
     # Inference Endpoint: Backboard, Groq, OpenRouter, Hugging Face, or Ollama
     gemma_api_endpoint: str = Field(default_factory=_get_endpoint)
 
-    # Gemma model name (e.g., google/gemma-4, google/gemma-3-12b-it, gemma2-9b-it)
+    # Gemma model name (e.g., google/gemma-4-26b-a4b-it, google/gemma-3-12b-it)
     gemma_model: str = Field(default_factory=_get_model)
 
-    # Backboard LLM Provider (e.g., 'google', 'openrouter')
+    # Backboard LLM Provider (e.g., 'openrouter', 'google')
     backboard_provider: str = Field(default_factory=lambda: (
         os.getenv("BACKBOARD_PROVIDER") 
         or os.getenv("LLM_PROVIDER") 
-        or "google"
+        or "openrouter"
     ).strip().lower())
 
     # Format override: 'auto', 'backboard', or 'openai_compatible'
@@ -101,7 +101,7 @@ class Settings(BaseModel):
         self.backboard_provider = (
             os.getenv("BACKBOARD_PROVIDER") 
             or os.getenv("LLM_PROVIDER") 
-            or "google"
+            or "openrouter"
         ).strip().lower()
 
     def is_gemma_configured(self) -> bool:

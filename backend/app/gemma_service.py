@@ -315,6 +315,20 @@ class GemmaInferenceService:
             data = msg_res.json()
             content = data.get("content", "")
 
+            if data.get("status") == "FAILED" or "LLM Error" in content:
+                return TestConnectionResult(
+                    success=False,
+                    provider="Backboard API",
+                    model=cfg.gemma_model,
+                    endpoint=messages_url,
+                    masked_key=cfg.get_masked_api_key(),
+                    gemma_verified=False,
+                    latency_ms=latency,
+                    message=f"Model execution failed on Backboard: {content}",
+                    error_detail=content,
+                    available_gemma_models=gemma_models_found
+                )
+
             return TestConnectionResult(
                 success=True,
                 provider="Backboard API",
@@ -494,6 +508,11 @@ Analyze this form document using Gemma. Follow all prompt instructions strictly.
                         )
                     res.raise_for_status()
                     data = res.json()
+                    if data.get("status") == "FAILED" or "LLM Error" in str(data.get("content", "")):
+                        err_msg = data.get("content", "Unknown error from Backboard provider")
+                        raise GemmaModelUnavailableError(
+                            f"Backboard error: {err_msg}"
+                        )
                     raw_content = data.get("content", "")
                 except httpx.HTTPStatusError as e:
                     raise RuntimeError(f"Backboard API HTTP {e.response.status_code}: {e.response.text}")

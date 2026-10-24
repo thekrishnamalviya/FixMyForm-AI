@@ -12,7 +12,7 @@ export default function App() {
   const [systemStatus, setSystemStatus] = useState(null);
   const [languageMode, setLanguageMode] = useState('dual'); // 'dual', 'en', 'hinglish'
   const [analysisData, setAnalysisData] = useState(null);
-  const [activeSampleId, setActiveSampleId] = useState('passport');
+  const [activeSampleId, setActiveSampleId] = useState('form_122b');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isRawSourceOpen, setIsRawSourceOpen] = useState(false);
@@ -52,7 +52,7 @@ export default function App() {
   // Fetch system status and initial sample on mount
   useEffect(() => {
     fetchSystemStatus();
-    loadSampleForm('passport');
+    loadSampleForm('form_122b');
   }, [fetchSystemStatus, loadSampleForm]);
 
   // Analyze custom document or text

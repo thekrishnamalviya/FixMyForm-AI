@@ -212,7 +212,7 @@ async def analyze_form_document(
     if not document_text.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Could not extract readable text from document. If this is a scanned document, ensure OCR is configured."
+            detail="Could not extract readable text from this document. If this is an image or scanned form without a digital text layer, please switch to the 'Paste Text' tab and paste the form contents, or upload a digital text-searchable PDF."
         )
 
     # 4. Invoke Gemma

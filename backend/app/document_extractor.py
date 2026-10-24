@@ -34,7 +34,7 @@ def is_ocr_available() -> bool:
 
 
 def extract_text_from_pdf(file_bytes: bytes) -> Tuple[str, int, bool, str]:
-    """Extracts text from PDF bytes.
+    """Extracts text from PDF bytes including text layer and interactive AcroForm fields.
     Returns: (extracted_text, page_count, is_scanned, extraction_method)
     """
     import pypdf
@@ -45,17 +45,44 @@ def extract_text_from_pdf(file_bytes: bytes) -> Tuple[str, int, bool, str]:
     
     extracted_pages = []
     has_any_text = False
+    total_raw_text_length = 0
 
     for idx, page in enumerate(reader.pages):
         page_text = page.extract_text() or ""
-        if page_text.strip():
+        stripped_text = page_text.strip()
+        if stripped_text:
             has_any_text = True
-            extracted_pages.append(f"--- [Page {idx + 1}] ---\n{page_text.strip()}\n")
+            total_raw_text_length += len(stripped_text)
+            extracted_pages.append(f"--- [Page {idx + 1}] ---\n{stripped_text}\n")
         else:
-            extracted_pages.append(f"--- [Page {idx + 1}] ---\n[No searchable text found on this page]\n")
+            extracted_pages.append(f"--- [Page {idx + 1}] ---\n[No direct text layer found on this page]\n")
 
-    full_text = "\n".join(extracted_pages)
-    is_scanned = (len(full_text.strip()) < 80 and page_count > 0) or (not has_any_text)
+    # Extract interactive form fields if present (e.g. government & official fillable PDFs)
+    form_fields_found = []
+    try:
+        fields = reader.get_fields()
+        if fields:
+            for field_name, field_info in fields.items():
+                if isinstance(field_info, dict):
+                    val = field_info.get('/V') or field_info.get('/TU') or ""
+                    form_fields_found.append(f"Field: {field_name} (Value/Hint: {val})")
+                else:
+                    form_fields_found.append(f"Field: {field_name}")
+    except Exception as e:
+        logger.debug(f"AcroForm field extraction skipped: {e}")
+
+    if form_fields_found:
+        extracted_pages.append("\n--- [Interactive Form Fields Extracted] ---")
+        extracted_pages.extend(form_fields_found[:150])  # limit to 150 fields to prevent overflow
+        has_any_text = True
+
+    is_scanned = (total_raw_text_length < 60 and not form_fields_found) or (not has_any_text)
+
+    # If no readable text or form fields were found at all
+    if not has_any_text:
+        full_text = ""
+    else:
+        full_text = "\n".join(extracted_pages)
 
     # If scanned and OCR is available, attempt OCR on embedded page images
     if is_scanned and TESSERACT_AVAILABLE:
@@ -78,7 +105,9 @@ def extract_text_from_pdf(file_bytes: bytes) -> Tuple[str, int, bool, str]:
             return "\n".join(ocr_pages), page_count, True, "tesseract_pdf_ocr"
 
     method = "pypdf_text"
-    if is_scanned:
+    if form_fields_found and not total_raw_text_length:
+        method = "pypdf_form_fields"
+    elif is_scanned:
         method = "scanned_pdf_raw"
 
     return full_text, page_count, is_scanned, method

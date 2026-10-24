@@ -7,6 +7,7 @@ export default function DemoModeBanner({
   activeSampleId 
 }) {
   const samplePills = [
+    { id: 'form_122b', label: '⚖️ Form 122B (Bankruptcy)', desc: 'Chapter 11 income statement, 6-month lookback' },
     { id: 'passport', label: '🛂 Indian Passport (Form 1)', desc: 'Tatkaal, Annexure E, Address rules' },
     { id: 'scholarship', label: '🎓 NSP Scholarship 2026', desc: '30-Nov cutoff, NPCI bank mapping' },
     { id: 'tax_12bb', label: '💼 Form 12BB Tax & HRA', desc: 'Landlord PAN, 80C & 80D proofs' },

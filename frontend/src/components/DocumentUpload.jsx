@@ -278,6 +278,13 @@ export default function DocumentUpload({
               <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
                 <button
                   type="button"
+                  onClick={() => onSelectSample('form_122b')}
+                  className="px-2.5 py-1 rounded-lg bg-indigo-950/70 hover:bg-indigo-900 text-indigo-300 text-xs font-medium border border-indigo-500/30 whitespace-nowrap"
+                >
+                  ⚖️ Form 122B
+                </button>
+                <button
+                  type="button"
                   onClick={() => onSelectSample('passport')}
                   className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 whitespace-nowrap"
                 >
